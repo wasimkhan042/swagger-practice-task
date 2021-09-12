@@ -2,12 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/go-openapi/loads"
-	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/swag"
+	"custom-server/handlers"
 
 	"custom-server/gen/restapi"
 	"custom-server/gen/restapi/operations"
@@ -23,7 +21,7 @@ func main() {
 	}
 
 	// create new service API
-	api := operations.NewGreeterAPI(swaggerSpec)
+	api := operations.NewSalamAPI(swaggerSpec)
 	server := restapi.NewServer(api)
 	defer func() {
 		_ = server.Shutdown()
@@ -36,16 +34,7 @@ func main() {
 
 	// GetGreetingHandler greets the given name,
 	// in case the name is not given, it will default to World
-	api.GetGreetingHandler = operations.GetGreetingHandlerFunc(
-		func(params operations.GetGreetingParams) middleware.Responder {
-			name := swag.StringValue(params.Name)
-			if name == "" {
-				name = "World"
-			}
-
-			greeting := fmt.Sprintf("Hello, %s!\n", name)
-			return operations.NewGetGreetingOK().WithPayload(greeting)
-		})
+	api.GetGreetingHandler = handlers.Newgreeting()
 
 	// serve API
 	if err := server.Serve(); err != nil {
